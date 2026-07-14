@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 
 import '../../services/score_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/game_ending.dart';
+import '../../widgets/game_scaffold.dart';
 import 'memory_data.dart';
 
 class _CardData {
@@ -24,6 +26,8 @@ class MemoryScreen extends StatefulWidget {
 }
 
 class _MemoryScreenState extends State<MemoryScreen> {
+  static const Color _themeColor = Color(0xFF7B3FA0);
+
   late List<_CardData> _cards;
   final List<int> _flippedIndices = [];
   int _moves = 0;
@@ -130,14 +134,12 @@ class _MemoryScreenState extends State<MemoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Memoria Verde')),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: _finished ? _buildEnding(context) : _buildGame(context),
-        ),
-      ),
+    return GameScaffold(
+      title: 'Memoria Verde',
+      emoji: '🧩',
+      color: _themeColor,
+      subtitle: 'Encontrá las parejas ecológicas',
+      child: _finished ? _buildEnding(context) : _buildGame(context),
     );
   }
 
@@ -147,28 +149,26 @@ class _MemoryScreenState extends State<MemoryScreen> {
       children: [
         Row(
           children: [
-            Icon(Icons.timer_outlined, color: AppTheme.earthBlue),
-            const SizedBox(width: 6),
-            Text('$_seconds s', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            HudChip(
+              icon: Icons.timer_outlined,
+              label: '$_seconds s',
+              color: AppTheme.earthBlue,
+            ),
             const Spacer(),
-            Text(
-              'Movimientos: $_moves',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            HudChip(
+              icon: Icons.swipe_rounded,
+              label: 'Movimientos: $_moves',
+              color: _themeColor,
             ),
           ],
         ),
-        const SizedBox(height: 6),
-        LinearProgressIndicator(
+        const SizedBox(height: 12),
+        GameProgressBar(
           value: _matches / _totalPairs,
-          minHeight: 6,
-          borderRadius: BorderRadius.circular(6),
+          label: 'Parejas encontradas: $_matches de $_totalPairs',
+          color: _themeColor,
         ),
-        const SizedBox(height: 6),
-        Text(
-          'Parejas encontradas: $_matches de $_totalPairs',
-          style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-        ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         Expanded(
           child: GridView.builder(
             itemCount: _cards.length,
@@ -180,6 +180,7 @@ class _MemoryScreenState extends State<MemoryScreen> {
             ),
             itemBuilder: (context, index) => _MemoryCard(
               card: _cards[index],
+              themeColor: _themeColor,
               onTap: () => _tapCard(index),
             ),
           ),
@@ -189,70 +190,53 @@ class _MemoryScreenState extends State<MemoryScreen> {
   }
 
   Widget _buildEnding(BuildContext context) {
+    final String emoji;
     final String title;
     final String message;
     if (_moves <= _totalPairs + 2) {
-      title = '¡Memoria de elefante! 🐘💚';
+      emoji = '🐘';
+      title = '¡Memoria de elefante!';
       message = 'Encontraste todas las parejas con muy pocos movimientos.';
     } else if (_moves <= _totalPairs * 2) {
-      title = '¡Buen trabajo! 🌱';
+      emoji = '🌱';
+      title = '¡Buen trabajo!';
       message = 'Completaste el juego con un buen número de intentos.';
     } else {
-      title = '¡Lo lograste! 🎉';
+      emoji = '🎉';
+      title = '¡Lo lograste!';
       message = 'Encontraste todas las parejas. ¡Probá superar tu marca la próxima vez!';
     }
 
-    return ListView(
-      children: [
-        const SizedBox(height: 20),
-        Icon(Icons.grid_view_rounded, size: 72, color: AppTheme.primaryGreen),
-        const SizedBox(height: 16),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          message,
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey.shade700, fontSize: 15),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'Tiempo: $_seconds s   •   Movimientos: $_moves',
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        if (_bestMoves != null) ...[
-          const SizedBox(height: 6),
-          Text(
-            _bestMoves == _moves
-                ? '¡Nuevo mejor puntaje! 🏆'
-                : 'Mejor puntaje: $_bestMoves movimientos',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-          ),
-        ],
-        const SizedBox(height: 28),
-        ElevatedButton(
-          onPressed: _restart,
-          child: const Text('Jugar de nuevo'),
-        ),
-        const SizedBox(height: 12),
-        OutlinedButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Volver al menú'),
-        ),
+    return GameEndingView(
+      emoji: emoji,
+      title: title,
+      message: message,
+      color: _themeColor,
+      stats: [
+        EndingStat(icon: Icons.timer_outlined, label: 'Tiempo', value: '$_seconds s'),
+        EndingStat(icon: Icons.swipe_rounded, label: 'Movimientos', value: '$_moves'),
+        EndingStat(icon: Icons.extension_rounded, label: 'Parejas', value: '$_matches'),
       ],
+      bestText: _bestMoves == null
+          ? null
+          : _bestMoves == _moves
+              ? '¡Nuevo mejor puntaje! 🏆'
+              : 'Mejor puntaje: $_bestMoves movimientos',
+      isNewBest: _bestMoves != null && _bestMoves == _moves,
+      onRestart: _restart,
     );
   }
 }
 
 class _MemoryCard extends StatelessWidget {
-  const _MemoryCard({required this.card, required this.onTap});
+  const _MemoryCard({
+    required this.card,
+    required this.themeColor,
+    required this.onTap,
+  });
 
   final _CardData card;
+  final Color themeColor;
   final VoidCallback onTap;
 
   @override
@@ -260,43 +244,65 @@ class _MemoryCard extends StatelessWidget {
     final revealed = card.faceUp || card.matched;
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: card.matched
-              ? AppTheme.primaryGreen.withValues(alpha: 0.15)
-              : revealed
-                  ? Colors.white
-                  : AppTheme.primaryGreen,
-          borderRadius: BorderRadius.circular(14),
-          border: card.matched
-              ? Border.all(color: AppTheme.primaryGreen, width: 2)
-              : null,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.all(6),
-        child: Center(
-          child: revealed
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(card.item.emoji, style: const TextStyle(fontSize: 26)),
-                    const SizedBox(height: 4),
-                    Text(
-                      card.item.label,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                )
-              : const Icon(Icons.eco_outlined, color: Colors.white, size: 26),
+      child: AnimatedScale(
+        scale: card.matched ? 0.95 : 1.0,
+        duration: const Duration(milliseconds: 250),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          decoration: BoxDecoration(
+            gradient: revealed
+                ? null
+                : LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      themeColor,
+                      Color.lerp(themeColor, Colors.black, 0.25)!,
+                    ],
+                  ),
+            color: card.matched
+                ? AppTheme.primaryGreen.withValues(alpha: 0.12)
+                : revealed
+                    ? Colors.white
+                    : null,
+            borderRadius: BorderRadius.circular(16),
+            border: card.matched
+                ? Border.all(color: AppTheme.primaryGreen, width: 2)
+                : revealed
+                    ? Border.all(color: themeColor.withValues(alpha: 0.3))
+                    : null,
+            boxShadow: [
+              BoxShadow(
+                color: revealed
+                    ? Colors.black.withValues(alpha: 0.06)
+                    : themeColor.withValues(alpha: 0.3),
+                blurRadius: 6,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(6),
+          child: Center(
+            child: revealed
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(card.item.emoji, style: const TextStyle(fontSize: 26)),
+                      const SizedBox(height: 4),
+                      Text(
+                        card.item.label,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  )
+                : Icon(
+                    Icons.eco_outlined,
+                    color: Colors.white.withValues(alpha: 0.9),
+                    size: 26,
+                  ),
+          ),
         ),
       ),
     );

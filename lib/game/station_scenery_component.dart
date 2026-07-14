@@ -8,7 +8,8 @@ import 'station_data.dart';
 /// Purely decorative props scattered around each station, themed to hint
 /// at that minigame before the player even opens it: little trees and a
 /// globe near the impact simulator, recycling bins near waste sorting, a
-/// question-mark signpost near the quiz, and face-down cards near memory.
+/// question-mark signpost near the quiz, face-down cards near memory, and a
+/// pond with reeds near the river cleanup.
 class StationSceneryComponent extends PositionComponent {
   StationSceneryComponent() : super(position: Vector2.zero(), size: kWorldSize, anchor: Anchor.topLeft);
 
@@ -25,6 +26,8 @@ class StationSceneryComponent extends PositionComponent {
           _renderQuizProps(canvas, base);
         case 'memory':
           _renderMemoryProps(canvas, base);
+        case 'river':
+          _renderRiverProps(canvas, base);
       }
     }
   }
@@ -128,6 +131,46 @@ class StationSceneryComponent extends PositionComponent {
         Paint()..color = colors[i],
       );
     }
+  }
+
+  void _renderRiverProps(Canvas canvas, Offset base) {
+    _drawPond(canvas, base + const Offset(0, 95));
+    _drawReeds(canvas, base + const Offset(-90, 55));
+    _drawReeds(canvas, base + const Offset(90, 55));
+  }
+
+  void _drawPond(Canvas canvas, Offset center) {
+    final pondRect = Rect.fromCenter(center: center, width: 90, height: 44);
+    canvas.drawOval(pondRect.shift(const Offset(0, 3)), Paint()..color = const Color(0x2E000000));
+    canvas.drawOval(pondRect, Paint()..color = const Color(0xFF3F8FDB));
+    canvas.drawOval(pondRect.deflate(6), Paint()..color = const Color(0xFF5CA8E8));
+    // Ripples and a resident fish hint at the minigame inside.
+    final ripplePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..color = const Color(0x66FFFFFF);
+    canvas.drawArc(Rect.fromCenter(center: center + const Offset(-18, -4), width: 20, height: 8), 0, 3.1, false, ripplePaint);
+    canvas.drawArc(Rect.fromCenter(center: center + const Offset(14, 6), width: 16, height: 6), 0, 3.1, false, ripplePaint);
+    TextPaint(style: const TextStyle(fontSize: 13))
+        .render(canvas, '🐟', Vector2(center.dx + 2, center.dy - 2), anchor: Anchor.center);
+  }
+
+  void _drawReeds(Canvas canvas, Offset base) {
+    final reedPaint = Paint()
+      ..color = const Color(0xFF3E7D3A)
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round;
+    for (var i = -1; i <= 1; i++) {
+      canvas.drawLine(
+        base + Offset(i * 5.0, 10),
+        base + Offset(i * 7.0, -12 - (i == 0 ? 6 : 0)),
+        reedPaint,
+      );
+    }
+    canvas.drawOval(
+      Rect.fromCenter(center: base + const Offset(0, -16), width: 6, height: 12),
+      Paint()..color = const Color(0xFF8A6B3F),
+    );
   }
 
   void _renderMemoryProps(Canvas canvas, Offset base) {

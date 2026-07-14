@@ -33,6 +33,7 @@ class SceneryComponent extends PositionComponent {
     Offset(1200, 300),
     Offset(400, 900),
     Offset(1200, 900),
+    Offset(800, 250),
   ];
 
   static final List<Offset> _houses = kHouseObstacles.map((v) => v.toOffset()).toList();
@@ -46,6 +47,25 @@ class SceneryComponent extends PositionComponent {
         position: Offset(random.nextDouble() * kWorldSize.x, random.nextDouble() * kWorldSize.y),
         light: random.nextBool(),
         angle: random.nextDouble() * math.pi,
+      );
+    });
+  }
+
+  static final List<_Flower> _flowers = _generateFlowers();
+
+  static List<_Flower> _generateFlowers() {
+    const petalColors = [
+      Color(0xFFF7F3E8),
+      Color(0xFFF2C4D0),
+      Color(0xFFF5DE8A),
+      Color(0xFFC9B8E8),
+    ];
+    final random = math.Random(7);
+    return List.generate(70, (_) {
+      return _Flower(
+        position: Offset(random.nextDouble() * kWorldSize.x, random.nextDouble() * kWorldSize.y),
+        color: petalColors[random.nextInt(petalColors.length)],
+        scale: 0.8 + random.nextDouble() * 0.5,
       );
     });
   }
@@ -73,10 +93,30 @@ class SceneryComponent extends PositionComponent {
   @override
   void render(Canvas canvas) {
     _renderGrass(canvas);
+    _renderFlowers(canvas);
     _renderPaths(canvas);
     _renderTrees(canvas);
     _renderBushes(canvas);
     _renderHouses(canvas);
+  }
+
+  void _renderFlowers(Canvas canvas) {
+    for (final flower in _flowers) {
+      final petalPaint = Paint()..color = flower.color;
+      for (var i = 0; i < 5; i++) {
+        final angle = i * 2 * math.pi / 5;
+        canvas.drawCircle(
+          flower.position + Offset(math.cos(angle), math.sin(angle)) * 3 * flower.scale,
+          2.2 * flower.scale,
+          petalPaint,
+        );
+      }
+      canvas.drawCircle(
+        flower.position,
+        1.8 * flower.scale,
+        Paint()..color = const Color(0xFFE8A93C),
+      );
+    }
   }
 
   void _renderGrass(Canvas canvas) {
@@ -204,4 +244,12 @@ class _GrassTuft {
   final Offset position;
   final bool light;
   final double angle;
+}
+
+class _Flower {
+  const _Flower({required this.position, required this.color, required this.scale});
+
+  final Offset position;
+  final Color color;
+  final double scale;
 }

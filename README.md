@@ -8,6 +8,7 @@ Aplicación Flutter con minijuegos para tomar conciencia sobre el cuidado del me
 - **Clasificá los Residuos**: arrastrás cada objeto al contenedor correcto (reciclable, orgánico, etc.) antes de que se acabe el tiempo.
 - **Quiz Ambiental**: preguntas rápidas de opción múltiple con explicación al responder.
 - **Memoria Verde**: juego de memoria con parejas de cartas sobre reciclaje y reutilización.
+- **Río Limpio**: juego arcade donde tocás la basura que flota por el río para recogerla, sin molestar a los peces, patos y demás animales que viven ahí.
 
 Cada juego guarda tu mejor puntaje localmente en el dispositivo (`shared_preferences`), así que podés ver si superaste tu marca anterior al terminar una partida.
 
@@ -25,6 +26,7 @@ lib/
     waste_sorting/             Clasificá los Residuos
     quiz/                      Quiz Ambiental
     memory/                    Memoria Verde
+    river_cleanup/             Río Limpio
 ```
 
 ## Cómo correr el proyecto

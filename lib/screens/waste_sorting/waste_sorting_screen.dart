@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 
 import '../../services/score_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/game_ending.dart';
+import '../../widgets/game_scaffold.dart';
 import 'waste_sorting_data.dart';
 
 class WasteSortingScreen extends StatefulWidget {
@@ -17,6 +19,8 @@ class WasteSortingScreen extends StatefulWidget {
 }
 
 class _WasteSortingScreenState extends State<WasteSortingScreen> {
+  static const Color _themeColor = AppTheme.earthBlue;
+
   late List<WasteItem> _items;
   int _index = 0;
   int _score = 0;
@@ -101,14 +105,12 @@ class _WasteSortingScreenState extends State<WasteSortingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Clasificá los Residuos')),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: _finished ? _buildEnding(context) : _buildGame(context),
-        ),
-      ),
+    return GameScaffold(
+      title: 'Clasificá los Residuos',
+      emoji: '🗑️',
+      color: _themeColor,
+      subtitle: 'Arrastrá cada objeto a su tacho',
+      child: _finished ? _buildEnding(context) : _buildGame(context),
     );
   }
 
@@ -119,55 +121,61 @@ class _WasteSortingScreenState extends State<WasteSortingScreen> {
       children: [
         Row(
           children: [
-            Icon(Icons.timer_outlined, color: AppTheme.earthBlue),
-            const SizedBox(width: 6),
-            Text(
-              '$_secondsLeft s',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            HudChip(
+              icon: Icons.timer_outlined,
+              label: '$_secondsLeft s',
+              color: _secondsLeft <= 10 ? Colors.redAccent : _themeColor,
             ),
             const Spacer(),
-            Text(
-              'Puntaje: $_score',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            HudChip(
+              icon: Icons.star_rounded,
+              label: 'Puntaje: $_score',
+              color: AppTheme.primaryGreen,
             ),
           ],
         ),
-        const SizedBox(height: 6),
-        LinearProgressIndicator(
+        const SizedBox(height: 12),
+        GameProgressBar(
           value: _secondsLeft / WasteSortingScreen.gameSeconds,
-          minHeight: 6,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'Objeto ${_index + 1} de ${_items.length}',
-          style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+          label: 'Objeto ${_index + 1} de ${_items.length}',
+          color: _themeColor,
         ),
         if (_feedback != null) ...[
           const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: (_feedbackCorrect ? AppTheme.primaryGreen : Colors.redAccent)
-                  .withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  _feedbackCorrect ? Icons.check_circle_outline : Icons.info_outline,
-                  color: _feedbackCorrect ? AppTheme.primaryGreen : Colors.redAccent,
-                  size: 18,
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            child: Container(
+              key: ValueKey(_index),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: (_feedbackCorrect ? AppTheme.primaryGreen : Colors.redAccent)
+                    .withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: (_feedbackCorrect ? AppTheme.primaryGreen : Colors.redAccent)
+                      .withValues(alpha: 0.35),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(_feedback!, style: const TextStyle(fontSize: 12)),
-                ),
-              ],
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _feedbackCorrect ? Icons.check_circle_rounded : Icons.info_rounded,
+                    color: _feedbackCorrect ? AppTheme.primaryGreen : Colors.redAccent,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      _feedback!,
+                      style: const TextStyle(fontSize: 12.5, height: 1.3),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
-        const SizedBox(height: 20),
+        const SizedBox(height: 18),
         Center(
           key: ValueKey(_index),
           child: Draggable<WasteItem>(
@@ -180,12 +188,19 @@ class _WasteSortingScreenState extends State<WasteSortingScreen> {
             child: _ItemCard(item: item),
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 10),
+        Center(
+          child: Text(
+            '⬇ Arrastralo hasta el tacho correcto ⬇',
+            style: TextStyle(color: Colors.grey.shade500, fontSize: 11.5),
+          ),
+        ),
+        const SizedBox(height: 12),
         Expanded(
           child: GridView.count(
             crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
             childAspectRatio: 2.4,
             children: WasteCategory.values
                 .map((category) => _BinTarget(
@@ -203,67 +218,40 @@ class _WasteSortingScreenState extends State<WasteSortingScreen> {
     final total = _items.length;
     final accuracy = total == 0 ? 0 : ((_score / total) * 100).round();
 
+    final String emoji;
     final String title;
     final String message;
     if (accuracy >= 80) {
-      title = '¡Experto en reciclaje! ♻️';
+      emoji = '♻️';
+      title = '¡Experto en reciclaje!';
       message = 'Clasificás los residuos con muy buena puntería. Seguí así en tu vida diaria.';
     } else if (accuracy >= 50) {
-      title = 'Vas bien encaminado 🌱';
+      emoji = '🌱';
+      title = 'Vas bien encaminado';
       message = 'Acertaste varios, pero todavía hay algunas categorías para repasar.';
     } else {
-      title = 'A seguir practicando 🤔';
+      emoji = '🤔';
+      title = 'A seguir practicando';
       message = 'Separar bien los residuos lleva práctica. ¡Intentalo de nuevo!';
     }
 
-    return ListView(
-      children: [
-        const SizedBox(height: 20),
-        Icon(Icons.recycling, size: 72, color: AppTheme.primaryGreen),
-        const SizedBox(height: 16),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          message,
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey.shade700, fontSize: 15),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          'Acertaste $_score de $_index objetos ($accuracy%)',
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        Text(
-          'Errores: $_mistakes',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-        ),
-        if (_bestAccuracy != null) ...[
-          const SizedBox(height: 6),
-          Text(
-            _bestAccuracy == accuracy
-                ? '¡Nuevo mejor puntaje! 🏆'
-                : 'Mejor puntaje: $_bestAccuracy%',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-          ),
-        ],
-        const SizedBox(height: 28),
-        ElevatedButton(
-          onPressed: _restart,
-          child: const Text('Jugar de nuevo'),
-        ),
-        const SizedBox(height: 12),
-        OutlinedButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Volver al menú'),
-        ),
+    return GameEndingView(
+      emoji: emoji,
+      title: title,
+      message: message,
+      color: _themeColor,
+      stats: [
+        EndingStat(icon: Icons.check_circle_outline, label: 'Aciertos', value: '$_score de $_index'),
+        EndingStat(icon: Icons.close_rounded, label: 'Errores', value: '$_mistakes'),
+        EndingStat(icon: Icons.percent_rounded, label: 'Precisión', value: '$accuracy%'),
       ],
+      bestText: _bestAccuracy == null
+          ? null
+          : _bestAccuracy == accuracy
+              ? '¡Nuevo mejor puntaje! 🏆'
+              : 'Mejor puntaje: $_bestAccuracy%',
+      isNewBest: _bestAccuracy != null && _bestAccuracy == accuracy,
+      onRestart: _restart,
     );
   }
 }
@@ -279,28 +267,38 @@ class _ItemCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Container(
-        width: 160,
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        width: 170,
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppTheme.earthBlue.withValues(alpha: 0.25)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: dragging ? 0.2 : 0.08),
-              blurRadius: dragging ? 12 : 6,
-              offset: const Offset(0, 3),
+              color: AppTheme.earthBlue.withValues(alpha: dragging ? 0.35 : 0.12),
+              blurRadius: dragging ? 16 : 8,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(item.emoji, style: const TextStyle(fontSize: 36)),
+            Container(
+              width: 58,
+              height: 58,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: item.category.color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Text(item.emoji, style: const TextStyle(fontSize: 32)),
+            ),
             const SizedBox(height: 8),
             Text(
               item.name,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
             ),
           ],
         ),
@@ -322,33 +320,51 @@ class _BinTarget extends StatelessWidget {
       onAcceptWithDetails: (details) => onAccept(details.data),
       builder: (context, candidateData, rejectedData) {
         final highlighted = candidateData.isNotEmpty;
-        return Container(
-          decoration: BoxDecoration(
-            color: category.color.withValues(alpha: highlighted ? 0.28 : 0.12),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: category.color.withValues(alpha: highlighted ? 0.9 : 0.4),
-              width: highlighted ? 2 : 1,
+        return AnimatedScale(
+          scale: highlighted ? 1.05 : 1.0,
+          duration: const Duration(milliseconds: 150),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  category.color.withValues(alpha: highlighted ? 0.35 : 0.14),
+                  category.color.withValues(alpha: highlighted ? 0.45 : 0.2),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: category.color.withValues(alpha: highlighted ? 1 : 0.45),
+                width: highlighted ? 2.5 : 1.5,
+              ),
             ),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(category.icon, color: category.color, size: 22),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  category.label,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: category.color,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.85),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(category.icon, color: category.color, size: 18),
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    category.label,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color.lerp(category.color, Colors.black, 0.3),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

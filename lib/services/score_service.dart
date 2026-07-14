@@ -8,6 +8,7 @@ class ScoreService {
   static const String wasteBestAccuracyKey = 'best_waste_accuracy';
   static const String memoryBestMovesKey = 'best_memory_moves';
   static const String impactBestScoreKey = 'best_impact_score';
+  static const String riverBestScoreKey = 'best_river_score';
 
   /// Stores [value] under [key] if it improves on the previous best, then
   /// returns the resulting best value (existing best when it wasn't beaten).

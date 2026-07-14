@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../screens/impact_simulator/impact_simulator_screen.dart';
 import '../screens/memory/memory_screen.dart';
 import '../screens/quiz/quiz_screen.dart';
+import '../screens/river_cleanup/river_cleanup_screen.dart';
 import '../screens/waste_sorting/waste_sorting_screen.dart';
 import '../services/score_service.dart';
 import '../theme/app_theme.dart';
@@ -64,6 +65,15 @@ final List<StationData> kStations = [
     position: Vector2(400, 900),
     screenBuilder: () => const QuizScreen(),
     scoreKey: ScoreService.quizBestAccuracyKey,
+  ),
+  StationData(
+    id: 'river',
+    title: 'Río Limpio',
+    emoji: '🐟',
+    color: AppTheme.riverTeal,
+    position: Vector2(800, 250),
+    screenBuilder: () => const RiverCleanupScreen(),
+    scoreKey: ScoreService.riverBestScoreKey,
   ),
   StationData(
     id: 'memory',
