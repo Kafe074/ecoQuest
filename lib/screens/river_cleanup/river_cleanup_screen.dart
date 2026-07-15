@@ -3,9 +3,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../services/score_service.dart';
 import '../../theme/app_theme.dart';
+import '../../theme/eco_textures.dart';
 import '../../widgets/game_ending.dart';
 import '../../widgets/game_scaffold.dart';
 import 'river_cleanup_data.dart';
@@ -149,7 +151,7 @@ class _RiverCleanupScreenState extends State<RiverCleanupScreen>
       } else {
         _score = max(0, _score - RiverCleanupScreen.animalPenalty);
         _mistakes++;
-        _showWarning('¡Cuidado! ${floater.item.name} vive en el río 💙');
+        _showWarning('¡Cuidado! ${floater.item.name} vive en el río');
       }
     });
   }
@@ -197,7 +199,7 @@ class _RiverCleanupScreenState extends State<RiverCleanupScreen>
   Widget build(BuildContext context) {
     return GameScaffold(
       title: 'Río Limpio',
-      emoji: '🐟',
+      icon: PhosphorIconsFill.fish,
       color: _themeColor,
       subtitle: 'Sacá la basura sin molestar a los animales',
       child: _finished ? _buildEnding(context) : _buildGame(context),
@@ -211,19 +213,19 @@ class _RiverCleanupScreenState extends State<RiverCleanupScreen>
         Row(
           children: [
             HudChip(
-              icon: Icons.timer_outlined,
+              icon: PhosphorIconsBold.timer,
               label: '$_secondsLeft s',
               color: _secondsLeft <= 10 ? Colors.redAccent : _themeColor,
             ),
             const Spacer(),
             HudChip(
-              icon: Icons.delete_sweep_rounded,
+              icon: PhosphorIconsFill.trashSimple,
               label: '$_collected',
               color: AppTheme.primaryGreen,
             ),
             const SizedBox(width: 8),
             HudChip(
-              icon: Icons.star_rounded,
+              icon: PhosphorIconsFill.star,
               label: 'Puntaje: $_score',
               color: Colors.amber.shade800,
             ),
@@ -232,7 +234,7 @@ class _RiverCleanupScreenState extends State<RiverCleanupScreen>
         const SizedBox(height: 12),
         GameProgressBar(
           value: _secondsLeft / RiverCleanupScreen.gameSeconds,
-          label: 'Tocá la basura 🥤 y dejá tranquilos a los animales 🐟',
+          label: 'Tocá la basura y dejá tranquilos a los animales',
           color: _themeColor,
         ),
         const SizedBox(height: 6),
@@ -252,8 +254,11 @@ class _RiverCleanupScreenState extends State<RiverCleanupScreen>
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.warning_amber_rounded,
-                            color: Colors.redAccent, size: 18),
+                        const PhosphorIcon(
+                          PhosphorIconsFill.warning,
+                          color: Colors.redAccent,
+                          size: 18,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -270,8 +275,14 @@ class _RiverCleanupScreenState extends State<RiverCleanupScreen>
         ),
         const SizedBox(height: 8),
         Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
+          child: Container(
+            decoration: AppTheme.clayDecoration(
+              surface: Colors.blue.shade400,
+              edge: AppTheme.darken(AppTheme.riverTeal, 0.2),
+              radius: 26,
+              depth: 5,
+            ),
+            clipBehavior: Clip.antiAlias,
             child: LayoutBuilder(
               builder: (context, constraints) {
                 _riverSize = Size(constraints.maxWidth, constraints.maxHeight);
@@ -291,23 +302,54 @@ class _RiverCleanupScreenState extends State<RiverCleanupScreen>
                       ),
                     ),
                     CustomPaint(painter: _WavePainter(time: _elapsed)),
-                    // Grassy banks framing the river.
+                    // Grassy banks with painted tufts framing the river.
                     Positioned(
                       top: 0,
                       left: 0,
                       right: 0,
-                      child: Container(height: 12, color: const Color(0xFF6FAE68)),
+                      child: SizedBox(
+                        height: 28,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Align(
+                              alignment: Alignment.topCenter,
+                              child: Container(height: 12, color: const Color(0xFF6FAE68)),
+                            ),
+                            const CustomPaint(
+                              painter: GrassFringePainter(
+                                color: Color(0xFF5C9B55),
+                                seed: 4,
+                                pointsUp: false,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                     Positioned(
                       bottom: 0,
                       left: 0,
                       right: 0,
-                      child: Container(height: 12, color: const Color(0xFF6FAE68)),
+                      child: SizedBox(
+                        height: 28,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Align(
+                              alignment: Alignment.bottomCenter,
+                              child: Container(height: 12, color: const Color(0xFF6FAE68)),
+                            ),
+                            const CustomPaint(
+                              painter: GrassFringePainter(
+                                color: Color(0xFF5C9B55),
+                                seed: 9,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    const Positioned(top: 8, left: 10, child: Text('🌿', style: TextStyle(fontSize: 18))),
-                    const Positioned(top: 8, right: 10, child: Text('🌾', style: TextStyle(fontSize: 18))),
-                    const Positioned(bottom: 8, left: 14, child: Text('🌾', style: TextStyle(fontSize: 18))),
-                    const Positioned(bottom: 8, right: 14, child: Text('🌿', style: TextStyle(fontSize: 18))),
                     for (final f in _floaters)
                       Positioned(
                         left: f.x - _itemSize / 2,
@@ -328,16 +370,27 @@ class _RiverCleanupScreenState extends State<RiverCleanupScreen>
                               alignment: Alignment.center,
                               decoration: f.item.isTrash
                                   ? BoxDecoration(
-                                      color: Colors.white.withValues(alpha: 0.25),
+                                      color: Colors.white.withValues(alpha: 0.30),
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: Colors.white.withValues(alpha: 0.5),
+                                        color: Colors.white.withValues(alpha: 0.55),
+                                        width: 1.6,
                                       ),
                                     )
                                   : null,
-                              child: Text(
-                                f.item.emoji,
-                                style: const TextStyle(fontSize: 30),
+                              child: PhosphorIcon(
+                                f.item.icon,
+                                size: 32,
+                                color: f.item.isTrash
+                                    ? AppTheme.darken(f.item.color, 0.15)
+                                    : f.item.color,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black.withValues(alpha: 0.35),
+                                    offset: const Offset(0, 2),
+                                    blurRadius: 4,
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -361,37 +414,37 @@ class _RiverCleanupScreenState extends State<RiverCleanupScreen>
   }
 
   Widget _buildEnding(BuildContext context) {
-    final String emoji;
+    final IconData icon;
     final String title;
     final String message;
     if (_collected >= 15 && _mistakes <= 2) {
-      emoji = '🏞️';
+      icon = PhosphorIconsFill.waves;
       title = '¡El río quedó cristalino!';
       message = 'Recogiste muchísima basura y respetaste a los animales. ¡Guardaparques honorario!';
     } else if (_collected >= 8) {
-      emoji = '💧';
+      icon = PhosphorIconsFill.drop;
       title = '¡Buen trabajo de limpieza!';
       message = 'El río está mucho mejor gracias a vos. Con más práctica quedará impecable.';
     } else {
-      emoji = '🐟';
+      icon = PhosphorIconsFill.fish;
       title = 'Los peces te lo agradecen';
       message = 'Cada pedacito de basura que sale del agua cuenta. ¡Intentalo de nuevo!';
     }
 
     return GameEndingView(
-      emoji: emoji,
+      icon: icon,
       title: title,
       message: message,
       color: _themeColor,
       stats: [
-        EndingStat(icon: Icons.star_rounded, label: 'Puntaje', value: '$_score'),
-        EndingStat(icon: Icons.delete_sweep_rounded, label: 'Basura recogida', value: '$_collected'),
-        EndingStat(icon: Icons.pets_rounded, label: 'Animales tocados', value: '$_mistakes'),
+        EndingStat(icon: PhosphorIconsFill.star, label: 'Puntaje', value: '$_score'),
+        EndingStat(icon: PhosphorIconsFill.trashSimple, label: 'Basura recogida', value: '$_collected'),
+        EndingStat(icon: PhosphorIconsFill.pawPrint, label: 'Animales tocados', value: '$_mistakes'),
       ],
       bestText: _bestScore == null
           ? null
           : _bestScore == _score
-              ? '¡Nuevo mejor puntaje! 🏆'
+              ? '¡Nuevo mejor puntaje!'
               : 'Mejor puntaje: $_bestScore puntos',
       isNewBest: _bestScore != null && _bestScore == _score,
       onRestart: _restart,

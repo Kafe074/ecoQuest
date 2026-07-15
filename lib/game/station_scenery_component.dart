@@ -1,8 +1,10 @@
 import 'dart:ui';
 
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart' show Colors, FontWeight, TextStyle;
+import 'package:flutter/material.dart' show Colors, FontWeight, IconData, TextStyle;
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import 'icon_paint.dart';
 import 'station_data.dart';
 
 /// Purely decorative props scattered around each station, themed to hint
@@ -74,12 +76,12 @@ class StationSceneryComponent extends PositionComponent {
   }
 
   void _renderWasteProps(Canvas canvas, Offset base) {
-    _drawBin(canvas, base + const Offset(-85, 60), const Color(0xFF3F7FDB), '♻️');
-    _drawBin(canvas, base + const Offset(0, 100), const Color(0xFF4E9A47), '🍂');
-    _drawBin(canvas, base + const Offset(85, 60), const Color(0xFFE0B23C), '🧴');
+    _drawBin(canvas, base + const Offset(-85, 60), const Color(0xFF3F7FDB), PhosphorIconsFill.recycle);
+    _drawBin(canvas, base + const Offset(0, 100), const Color(0xFF4E9A47), PhosphorIconsFill.leaf);
+    _drawBin(canvas, base + const Offset(85, 60), const Color(0xFFE0B23C), PhosphorIconsFill.sprayBottle);
   }
 
-  void _drawBin(Canvas canvas, Offset base, Color color, String icon) {
+  void _drawBin(Canvas canvas, Offset base, Color color, IconData icon) {
     canvas.drawOval(
       Rect.fromCenter(center: base + const Offset(0, 15), width: 24, height: 8),
       Paint()..color = const Color(0x2E000000),
@@ -90,8 +92,13 @@ class StationSceneryComponent extends PositionComponent {
       Rect.fromCenter(center: base + const Offset(0, -9), width: 26, height: 5),
       Paint()..color = Color.lerp(color, Colors.black, 0.2)!,
     );
-    TextPaint(style: const TextStyle(fontSize: 12))
-        .render(canvas, icon, Vector2(base.dx, base.dy + 4), anchor: Anchor.center);
+    renderIcon(
+      canvas,
+      icon,
+      position: Vector2(base.dx, base.dy + 4),
+      size: 12,
+      color: const Color(0xE6FFFFFF),
+    );
   }
 
   void _renderQuizProps(Canvas canvas, Offset base) {
@@ -151,8 +158,13 @@ class StationSceneryComponent extends PositionComponent {
       ..color = const Color(0x66FFFFFF);
     canvas.drawArc(Rect.fromCenter(center: center + const Offset(-18, -4), width: 20, height: 8), 0, 3.1, false, ripplePaint);
     canvas.drawArc(Rect.fromCenter(center: center + const Offset(14, 6), width: 16, height: 6), 0, 3.1, false, ripplePaint);
-    TextPaint(style: const TextStyle(fontSize: 13))
-        .render(canvas, '🐟', Vector2(center.dx + 2, center.dy - 2), anchor: Anchor.center);
+    renderIcon(
+      canvas,
+      PhosphorIconsFill.fish,
+      position: Vector2(center.dx + 2, center.dy - 2),
+      size: 13,
+      color: const Color(0xFFFFCA6B),
+    );
   }
 
   void _drawReeds(Canvas canvas, Offset base) {
@@ -196,7 +208,13 @@ class StationSceneryComponent extends PositionComponent {
         ..strokeWidth = 1.2
         ..color = Colors.white.withValues(alpha: 0.7),
     );
-    TextPaint(style: const TextStyle(fontSize: 11)).render(canvas, '🧩', Vector2.zero(), anchor: Anchor.center);
+    renderIcon(
+      canvas,
+      PhosphorIconsFill.puzzlePiece,
+      position: Vector2.zero(),
+      size: 11,
+      color: const Color(0xE6FFFFFF),
+    );
     canvas.restore();
   }
 }

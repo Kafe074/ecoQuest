@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../services/score_service.dart';
 import '../../theme/app_theme.dart';
@@ -136,7 +137,7 @@ class _MemoryScreenState extends State<MemoryScreen> {
   Widget build(BuildContext context) {
     return GameScaffold(
       title: 'Memoria Verde',
-      emoji: '🧩',
+      icon: PhosphorIconsFill.puzzlePiece,
       color: _themeColor,
       subtitle: 'Encontrá las parejas ecológicas',
       child: _finished ? _buildEnding(context) : _buildGame(context),
@@ -150,13 +151,13 @@ class _MemoryScreenState extends State<MemoryScreen> {
         Row(
           children: [
             HudChip(
-              icon: Icons.timer_outlined,
+              icon: PhosphorIconsBold.timer,
               label: '$_seconds s',
               color: AppTheme.earthBlue,
             ),
             const Spacer(),
             HudChip(
-              icon: Icons.swipe_rounded,
+              icon: PhosphorIconsBold.handTap,
               label: 'Movimientos: $_moves',
               color: _themeColor,
             ),
@@ -169,19 +170,27 @@ class _MemoryScreenState extends State<MemoryScreen> {
           color: _themeColor,
         ),
         const SizedBox(height: 14),
+        // Cap the board width so cards stay small and tidy on wide screens
+        // instead of stretching to fill the whole viewport.
         Expanded(
-          child: GridView.builder(
-            itemCount: _cards.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              childAspectRatio: 0.75,
-            ),
-            itemBuilder: (context, index) => _MemoryCard(
-              card: _cards[index],
-              themeColor: _themeColor,
-              onTap: () => _tapCard(index),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: GridView.builder(
+                shrinkWrap: true,
+                itemCount: _cards.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  childAspectRatio: 0.78,
+                ),
+                itemBuilder: (context, index) => _MemoryCard(
+                  card: _cards[index],
+                  themeColor: _themeColor,
+                  onTap: () => _tapCard(index),
+                ),
+              ),
             ),
           ),
         ),
@@ -190,37 +199,37 @@ class _MemoryScreenState extends State<MemoryScreen> {
   }
 
   Widget _buildEnding(BuildContext context) {
-    final String emoji;
+    final IconData icon;
     final String title;
     final String message;
     if (_moves <= _totalPairs + 2) {
-      emoji = '🐘';
+      icon = PhosphorIconsFill.brain;
       title = '¡Memoria de elefante!';
       message = 'Encontraste todas las parejas con muy pocos movimientos.';
     } else if (_moves <= _totalPairs * 2) {
-      emoji = '🌱';
+      icon = PhosphorIconsFill.plant;
       title = '¡Buen trabajo!';
       message = 'Completaste el juego con un buen número de intentos.';
     } else {
-      emoji = '🎉';
+      icon = PhosphorIconsFill.confetti;
       title = '¡Lo lograste!';
       message = 'Encontraste todas las parejas. ¡Probá superar tu marca la próxima vez!';
     }
 
     return GameEndingView(
-      emoji: emoji,
+      icon: icon,
       title: title,
       message: message,
       color: _themeColor,
       stats: [
-        EndingStat(icon: Icons.timer_outlined, label: 'Tiempo', value: '$_seconds s'),
-        EndingStat(icon: Icons.swipe_rounded, label: 'Movimientos', value: '$_moves'),
-        EndingStat(icon: Icons.extension_rounded, label: 'Parejas', value: '$_matches'),
+        EndingStat(icon: PhosphorIconsBold.timer, label: 'Tiempo', value: '$_seconds s'),
+        EndingStat(icon: PhosphorIconsBold.handTap, label: 'Movimientos', value: '$_moves'),
+        EndingStat(icon: PhosphorIconsBold.puzzlePiece, label: 'Parejas', value: '$_matches'),
       ],
       bestText: _bestMoves == null
           ? null
           : _bestMoves == _moves
-              ? '¡Nuevo mejor puntaje! 🏆'
+              ? '¡Nuevo mejor puntaje!'
               : 'Mejor puntaje: $_bestMoves movimientos',
       isNewBest: _bestMoves != null && _bestMoves == _moves,
       onRestart: _restart,
@@ -245,10 +254,11 @@ class _MemoryCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedScale(
-        scale: card.matched ? 0.95 : 1.0,
+        scale: card.matched ? 0.96 : 1.0,
         duration: const Duration(milliseconds: 250),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             gradient: revealed
                 ? null
@@ -260,12 +270,8 @@ class _MemoryCard extends StatelessWidget {
                       Color.lerp(themeColor, Colors.black, 0.25)!,
                     ],
                   ),
-            color: card.matched
-                ? AppTheme.primaryGreen.withValues(alpha: 0.12)
-                : revealed
-                    ? Colors.white
-                    : null,
-            borderRadius: BorderRadius.circular(16),
+            color: revealed ? Colors.white : null,
+            borderRadius: BorderRadius.circular(14),
             border: card.matched
                 ? Border.all(color: AppTheme.primaryGreen, width: 2)
                 : revealed
@@ -274,36 +280,90 @@ class _MemoryCard extends StatelessWidget {
             boxShadow: [
               BoxShadow(
                 color: revealed
-                    ? Colors.black.withValues(alpha: 0.06)
+                    ? Colors.black.withValues(alpha: 0.08)
                     : themeColor.withValues(alpha: 0.3),
                 blurRadius: 6,
                 offset: const Offset(0, 3),
               ),
             ],
           ),
-          padding: const EdgeInsets.all(6),
-          child: Center(
-            child: revealed
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(card.item.emoji, style: const TextStyle(fontSize: 26)),
-                      const SizedBox(height: 4),
-                      Text(
-                        card.item.label,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700),
-                      ),
-                    ],
-                  )
-                : Icon(
-                    Icons.eco_outlined,
-                    color: Colors.white.withValues(alpha: 0.9),
-                    size: 26,
+          child: revealed ? _buildFace() : _buildBack(),
+        ),
+      ),
+    );
+  }
+
+  /// Revealed face: the real photo filling the card with the concept label
+  /// on a small strip below, plus a check badge once matched.
+  Widget _buildFace() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.asset(
+                card.item.image,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => ColoredBox(
+                  color: card.item.color.withValues(alpha: 0.12),
+                  child: Center(
+                    child: PhosphorIcon(
+                      card.item.icon,
+                      size: 24,
+                      color: card.item.color,
+                    ),
                   ),
+                ),
+              ),
+              if (card.matched)
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: const BoxDecoration(
+                      color: AppTheme.primaryGreen,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const PhosphorIcon(
+                      PhosphorIconsBold.check,
+                      size: 10,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
+        Container(
+          color: card.matched
+              ? AppTheme.primaryGreen.withValues(alpha: 0.10)
+              : Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
+          child: Text(
+            card.item.label,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 8.5,
+              fontWeight: FontWeight.w800,
+              color: AppTheme.ink,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBack() {
+    return Center(
+      child: PhosphorIcon(
+        PhosphorIconsFill.leaf,
+        color: Colors.white.withValues(alpha: 0.9),
+        size: 24,
       ),
     );
   }

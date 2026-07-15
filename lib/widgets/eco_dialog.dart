@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
-/// Modern rounded dialog used by the minigames for feedback and fun facts:
-/// a colored emoji badge, centered text and a single filled action button.
+import '../theme/app_theme.dart';
+
+/// Clay-styled dialog used by the minigames for feedback and fun facts: a
+/// colored icon badge, centered text and a single filled action button.
 Future<void> showEcoDialog(
   BuildContext context, {
   required String title,
   required String message,
   required Color color,
-  required String emoji,
+  required IconData icon,
   String buttonLabel = 'Continuar',
 }) {
   return showDialog<void>(
@@ -21,27 +24,36 @@ Future<void> showEcoDialog(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 64,
-              height: 64,
+              width: 68,
+              height: 68,
               alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-                border: Border.all(color: color.withValues(alpha: 0.3)),
+              decoration: AppTheme.clayDecoration(
+                surface: AppTheme.lighten(color, 0.82),
+                edge: color.withValues(alpha: 0.45),
+                radius: 22,
+                depth: 4,
+                borderColor: color.withValues(alpha: 0.30),
               ),
-              child: Text(emoji, style: const TextStyle(fontSize: 30)),
+              child: PhosphorIcon(icon, size: 34, color: AppTheme.darken(color, 0.1)),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 10),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14.5, height: 1.45, color: Colors.grey.shade800),
+              style: const TextStyle(
+                fontSize: 14.5,
+                height: 1.45,
+                color: AppTheme.fadedInk,
+              ),
             ),
             const SizedBox(height: 22),
             SizedBox(
@@ -50,7 +62,9 @@ Future<void> showEcoDialog(
                 style: FilledButton.styleFrom(
                   backgroundColor: color,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(

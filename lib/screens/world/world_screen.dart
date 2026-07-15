@@ -2,10 +2,12 @@ import 'dart:math';
 
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../game/npc_data.dart';
 import '../../game/station_data.dart';
 import '../../game/world_game.dart';
+import '../../widgets/game_modal.dart';
 import 'interact_prompt.dart';
 
 class WorldScreen extends StatefulWidget {
@@ -25,7 +27,9 @@ class _WorldScreenState extends State<WorldScreen> {
   Future<void> _openMinigame(StationData station) async {
     _game.pauseEngine();
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => station.screenBuilder()),
+      station.isModal
+          ? GameModal.modalRoute(station.screenBuilder)
+          : MaterialPageRoute(builder: (_) => station.screenBuilder()),
     );
     if (mounted) {
       _game.resumeEngine();
@@ -38,10 +42,22 @@ class _WorldScreenState extends State<WorldScreen> {
       ..clearSnackBars()
       ..showSnackBar(
         SnackBar(
-          content: Text('${npc.emoji} ${npc.name}: ${npc.messages[_random.nextInt(npc.messages.length)]}'),
+          content: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              PhosphorIcon(npc.icon, size: 20, color: Colors.white),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  '${npc.name}: ${npc.messages[_random.nextInt(npc.messages.length)]}',
+                ),
+              ),
+            ],
+          ),
           backgroundColor: npc.color.withValues(alpha: 0.95),
           duration: const Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       );
   }
@@ -70,7 +86,8 @@ class _WorldScreenState extends State<WorldScreen> {
               if (station != null) {
                 return InteractPrompt(
                   color: station.color,
-                  label: '${station.emoji} Tocá para jugar: ${station.title}',
+                  icon: station.icon,
+                  label: 'Tocá para jugar: ${station.title}',
                   onPressed: _game.interact,
                 );
               }
@@ -82,7 +99,8 @@ class _WorldScreenState extends State<WorldScreen> {
                   if (npc == null) return const SizedBox.shrink();
                   return InteractPrompt(
                     color: npc.color,
-                    label: '${npc.emoji} Hablar con ${npc.name}',
+                    icon: PhosphorIconsFill.chatCircleDots,
+                    label: 'Hablar con ${npc.name}',
                     onPressed: _game.interact,
                   );
                 },

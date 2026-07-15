@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:save_earth/widgets/option_tile.dart';
 import 'package:save_earth/screens/impact_simulator/impact_simulator_data.dart';
 import 'package:save_earth/screens/impact_simulator/impact_simulator_screen.dart';
 
 /// Taps the option at [optionIndex] for the current scenario and dismisses
 /// the resulting feedback dialog, leaving the game on the next scenario.
 Future<void> _answerOption(WidgetTester tester, {int optionIndex = 0}) async {
-  await tester.tap(find.byType(OutlinedButton).at(optionIndex));
+  await tester.tap(find.byType(OptionTile).at(optionIndex));
   await tester.pumpAndSettle();
 
   await tester.tap(find.text('Continuar'));
@@ -25,14 +26,14 @@ void main() {
 
     expect(find.textContaining('Situación 1 de ${impactScenarios.length}'), findsOneWidget);
     expect(find.text('Contaminación'), findsOneWidget);
-    expect(find.text('Recursos naturales'), findsOneWidget);
+    expect(find.text('Recursos'), findsOneWidget);
     expect(find.text('Calidad de vida'), findsOneWidget);
   });
 
   testWidgets('Choosing an option shows a feedback dialog and advances to the next scenario', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: ImpactSimulatorScreen()));
 
-    await tester.tap(find.byType(OutlinedButton).first);
+    await tester.tap(find.byType(OptionTile).first);
     await tester.pump();
 
     expect(find.text('¿Sabías que...?'), findsOneWidget);
@@ -53,7 +54,7 @@ void main() {
       await _answerOption(tester);
     }
 
-    expect(find.textContaining('Puntaje ecológico:'), findsOneWidget);
+    expect(find.textContaining('Puntaje ecológico'), findsOneWidget);
     expect(find.text('Jugar de nuevo'), findsOneWidget);
 
     await tester.tap(find.text('Jugar de nuevo'));

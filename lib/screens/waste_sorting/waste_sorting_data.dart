@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 enum WasteCategory { plastico, papel, vidrio, organico, noReciclable }
 
@@ -36,15 +37,15 @@ extension WasteCategoryInfo on WasteCategory {
   IconData get icon {
     switch (this) {
       case WasteCategory.plastico:
-        return Icons.local_drink_outlined;
+        return PhosphorIconsFill.sprayBottle;
       case WasteCategory.papel:
-        return Icons.description_outlined;
+        return PhosphorIconsFill.newspaper;
       case WasteCategory.vidrio:
-        return Icons.liquor_outlined;
+        return PhosphorIconsFill.jar;
       case WasteCategory.organico:
-        return Icons.eco_outlined;
+        return PhosphorIconsFill.plant;
       case WasteCategory.noReciclable:
-        return Icons.delete_forever_outlined;
+        return PhosphorIconsFill.trashSimple;
     }
   }
 }
@@ -52,13 +53,13 @@ extension WasteCategoryInfo on WasteCategory {
 class WasteItem {
   const WasteItem({
     required this.name,
-    required this.emoji,
+    required this.icon,
     required this.category,
     required this.fact,
   });
 
   final String name;
-  final String emoji;
+  final IconData icon;
   final WasteCategory category;
   final String fact;
 }
@@ -66,91 +67,91 @@ class WasteItem {
 const List<WasteItem> wasteItems = [
   WasteItem(
     name: 'Botella de plástico',
-    emoji: '🧴',
+    icon: PhosphorIconsFill.beerBottle,
     category: WasteCategory.plastico,
     fact: 'Una botella de plástico puede tardar hasta 450 años en degradarse.',
   ),
   WasteItem(
     name: 'Bolsa de plástico',
-    emoji: '🛍️',
+    icon: PhosphorIconsFill.bagSimple,
     category: WasteCategory.plastico,
     fact: 'Las bolsas de plástico suelen usarse minutos pero contaminar durante siglos.',
   ),
   WasteItem(
     name: 'Vaso de yogur',
-    emoji: '🥣',
+    icon: PhosphorIconsFill.pintGlass,
     category: WasteCategory.plastico,
     fact: 'Enjuagar los envases antes de tirarlos mejora mucho su reciclabilidad.',
   ),
   WasteItem(
     name: 'Diario viejo',
-    emoji: '📰',
+    icon: PhosphorIconsFill.newspaperClipping,
     category: WasteCategory.papel,
     fact: 'El papel puede reciclarse varias veces antes de perder calidad.',
   ),
   WasteItem(
     name: 'Caja de cartón',
-    emoji: '📦',
+    icon: PhosphorIconsFill.package,
     category: WasteCategory.papel,
     fact: 'Reciclar cartón ahorra árboles, agua y energía frente a fabricar cartón nuevo.',
   ),
   WasteItem(
     name: 'Hoja de cuaderno',
-    emoji: '📄',
+    icon: PhosphorIconsFill.fileText,
     category: WasteCategory.papel,
     fact: 'Reciclar una tonelada de papel ahorra alrededor de 17 árboles.',
   ),
   WasteItem(
     name: 'Botella de vidrio',
-    emoji: '🍾',
+    icon: PhosphorIconsFill.wine,
     category: WasteCategory.vidrio,
     fact: 'El vidrio es 100% reciclable y puede reutilizarse infinitas veces sin perder calidad.',
   ),
   WasteItem(
     name: 'Frasco de mermelada',
-    emoji: '🫙',
+    icon: PhosphorIconsFill.jarLabel,
     category: WasteCategory.vidrio,
     fact: 'Los frascos de vidrio se pueden reutilizar en casa antes de reciclarlos.',
   ),
   WasteItem(
-    name: 'Cáscara de banana',
-    emoji: '🍌',
+    name: 'Cáscara de fruta',
+    icon: PhosphorIconsFill.orangeSlice,
     category: WasteCategory.organico,
     fact: 'Los residuos orgánicos se pueden compostar y convertir en abono natural.',
   ),
   WasteItem(
     name: 'Restos de comida',
-    emoji: '🍲',
+    icon: PhosphorIconsFill.bowlFood,
     category: WasteCategory.organico,
     fact: 'En un basural, la materia orgánica genera metano, un gas de efecto invernadero potente.',
   ),
   WasteItem(
     name: 'Yerba usada',
-    emoji: '🧉',
+    icon: PhosphorIconsFill.teaBag,
     category: WasteCategory.organico,
     fact: 'La yerba usada es un excelente aporte de nitrógeno para el compost.',
   ),
   WasteItem(
     name: 'Pila usada',
-    emoji: '🔋',
+    icon: PhosphorIconsFill.batteryWarning,
     category: WasteCategory.noReciclable,
     fact: 'Las pilas contienen metales pesados y deben llevarse a puntos de recolección especiales.',
   ),
   WasteItem(
     name: 'Colilla de cigarrillo',
-    emoji: '🚬',
+    icon: PhosphorIconsFill.cigarette,
     category: WasteCategory.noReciclable,
     fact: 'Las colillas contienen plástico (acetato de celulosa) y tardan años en degradarse.',
   ),
   WasteItem(
     name: 'Pañal descartable',
-    emoji: '🩲',
+    icon: PhosphorIconsFill.baby,
     category: WasteCategory.noReciclable,
     fact: 'Los pañales descartables combinan materiales que no se pueden separar para reciclar.',
   ),
   WasteItem(
     name: 'Envoltorio de golosina',
-    emoji: '🍬',
+    icon: PhosphorIconsFill.cookie,
     category: WasteCategory.noReciclable,
     fact: 'Los envoltorios multicapa mezclan plástico y aluminio, muy difíciles de reciclar.',
   ),

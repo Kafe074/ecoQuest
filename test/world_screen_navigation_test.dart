@@ -21,19 +21,19 @@ void main() {
       game.setNearbyStation(kStations.first);
       await tester.pump();
 
-      expect(find.text('🌍 Tocá para jugar: Simulador de Impacto'), findsOneWidget);
+      expect(find.text('Tocá para jugar: Simulador de Impacto'), findsOneWidget);
 
       // pumpAndSettle never converges while a live GameWidget is in the
       // tree (its game loop keeps scheduling frames), so drive the route
       // transition with a bounded pump instead.
-      await tester.tap(find.byType(ElevatedButton));
+      await tester.tap(find.text('Tocá para jugar: Simulador de Impacto'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.byType(ImpactSimulatorScreen), findsOneWidget);
       expect(game.paused, isTrue);
 
-      await tester.pageBack();
+      await tester.tap(find.byTooltip('Cerrar'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 

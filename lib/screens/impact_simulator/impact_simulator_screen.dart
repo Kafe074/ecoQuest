@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../services/score_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/eco_dialog.dart';
 import '../../widgets/game_ending.dart';
+import '../../widgets/game_modal.dart';
 import '../../widgets/game_scaffold.dart';
+import '../../widgets/option_tile.dart';
 import '../../widgets/stat_bar.dart';
 import 'impact_simulator_data.dart';
 
@@ -42,7 +45,7 @@ class _ImpactSimulatorScreenState extends State<ImpactSimulatorScreen> {
       title: '¿Sabías que...?',
       message: option.feedback,
       color: _themeColor,
-      emoji: '💡',
+      icon: PhosphorIconsFill.lightbulb,
     );
 
     setState(() => _index++);
@@ -70,9 +73,9 @@ class _ImpactSimulatorScreenState extends State<ImpactSimulatorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return GameScaffold(
+    return GameModal(
       title: 'Simulador de Impacto',
-      emoji: '🌍',
+      icon: PhosphorIconsFill.globeHemisphereWest,
       color: _themeColor,
       subtitle: 'Tus decisiones cambian el planeta',
       child: _finished ? _buildEnding(context) : _buildScenario(context),
@@ -80,121 +83,72 @@ class _ImpactSimulatorScreenState extends State<ImpactSimulatorScreen> {
   }
 
   Widget _buildStats() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          StatBar(
+    return Row(
+      children: [
+        Expanded(
+          child: StatBar(
             label: 'Contaminación',
             value: _pollution,
-            icon: Icons.cloud_outlined,
+            icon: PhosphorIconsFill.factory,
             color: Colors.redAccent,
           ),
-          const SizedBox(height: 10),
-          StatBar(
-            label: 'Recursos naturales',
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: StatBar(
+            label: 'Recursos',
             value: _resources,
-            icon: Icons.eco_outlined,
+            icon: PhosphorIconsFill.leaf,
             color: AppTheme.primaryGreen,
           ),
-          const SizedBox(height: 10),
-          StatBar(
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: StatBar(
             label: 'Calidad de vida',
             value: _health,
-            icon: Icons.favorite_border,
+            icon: PhosphorIconsFill.heart,
             color: AppTheme.earthBlue,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildScenario(BuildContext context) {
     final scenario = impactScenarios[_index];
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildStats(),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         GameProgressBar(
           value: _index / impactScenarios.length,
           label: 'Situación ${_index + 1} de ${impactScenarios.length}',
           color: _themeColor,
         ),
         const SizedBox(height: 14),
-        Expanded(
-          child: ListView(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: const Border(
-                    left: BorderSide(color: _themeColor, width: 5),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Text(
-                  scenario.question,
-                  style: const TextStyle(fontSize: 18.5, fontWeight: FontWeight.w700, height: 1.35),
-                ),
-              ),
-              const SizedBox(height: 16),
-              ...scenario.options.map(
-                (option) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black87,
-                      side: BorderSide(color: _themeColor.withValues(alpha: 0.3)),
-                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      alignment: Alignment.centerLeft,
-                    ),
-                    onPressed: () => _chooseOption(option),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.touch_app_outlined,
-                          size: 18,
-                          color: _themeColor.withValues(alpha: 0.7),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            option.text,
-                            style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: AppTheme.claySurface(tint: _themeColor, radius: 18, depth: 3),
+          child: Text(
+            scenario.question,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, height: 1.3),
           ),
         ),
+        const SizedBox(height: 12),
+        ...List.generate(scenario.options.length, (optionIndex) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: OptionTile(
+              color: _themeColor,
+              leadingText: String.fromCharCode(65 + optionIndex),
+              label: scenario.options[optionIndex].text,
+              onTap: () => _chooseOption(scenario.options[optionIndex]),
+            ),
+          );
+        }),
       ],
     );
   }
@@ -202,44 +156,45 @@ class _ImpactSimulatorScreenState extends State<ImpactSimulatorScreen> {
   Widget _buildEnding(BuildContext context) {
     final ecoScore = _ecoScore;
 
-    final String emoji;
+    final IconData icon;
     final String title;
     final String message;
     if (ecoScore >= 80) {
-      emoji = '🌎';
+      icon = PhosphorIconsFill.globeHemisphereWest;
       title = '¡Sos un héroe del planeta!';
       message =
           'Tus decisiones cotidianas generan un impacto muy positivo. Seguí eligiendo reutilizar, reciclar y ahorrar recursos.';
     } else if (ecoScore >= 60) {
-      emoji = '🌱';
+      icon = PhosphorIconsFill.plant;
       title = 'Vas por buen camino';
       message =
           'Tomás varias decisiones responsables. Con pequeños cambios más podés reducir aún más tu impacto.';
     } else if (ecoScore >= 40) {
-      emoji = '🤔';
+      icon = PhosphorIconsFill.lightbulb;
       title = 'Podés mejorar bastante';
       message =
           'Algunas de tus elecciones generan bastante contaminación. Pensá qué hábitos podrías cambiar en tu día a día.';
     } else {
-      emoji = '🚨';
+      icon = PhosphorIconsFill.warning;
       title = 'El planeta necesita un cambio';
       message =
           'Tus decisiones generaron mucho impacto negativo. La buena noticia es que cada elección cuenta y siempre se puede empezar de nuevo.';
     }
 
     return GameEndingView(
-      emoji: emoji,
+      compact: true,
+      icon: icon,
       title: title,
       message: message,
       color: _themeColor,
       stats: [
-        EndingStat(icon: Icons.emoji_events_outlined, label: 'Puntaje ecológico:', value: '$ecoScore/100'),
-        EndingStat(icon: Icons.fact_check_outlined, label: 'Decisiones', value: '${impactScenarios.length}'),
+        EndingStat(icon: PhosphorIconsBold.trophy, label: 'Puntaje ecológico', value: '$ecoScore/100'),
+        EndingStat(icon: PhosphorIconsBold.listChecks, label: 'Decisiones', value: '${impactScenarios.length}'),
       ],
       bestText: _bestEcoScore == null
           ? null
           : _bestEcoScore == ecoScore
-              ? '¡Nuevo mejor puntaje! 🏆'
+              ? '¡Nuevo mejor puntaje!'
               : 'Mejor puntaje: $_bestEcoScore/100',
       isNewBest: _bestEcoScore != null && _bestEcoScore == ecoScore,
       extra: Column(
@@ -254,9 +209,22 @@ class _ImpactSimulatorScreenState extends State<ImpactSimulatorScreen> {
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: _themeColor.withValues(alpha: 0.2)),
             ),
-            child: const Text(
-              '💚 Cada pequeña decisión suma: reutilizar, reciclar y consumir con conciencia son elecciones que están a tu alcance todos los días.',
-              style: TextStyle(fontStyle: FontStyle.italic, height: 1.4),
+            child: const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                PhosphorIcon(
+                  PhosphorIconsFill.handHeart,
+                  size: 22,
+                  color: _themeColor,
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Cada pequeña decisión suma: reutilizar, reciclar y consumir con conciencia son elecciones que están a tu alcance todos los días.',
+                    style: TextStyle(fontStyle: FontStyle.italic, height: 1.4),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

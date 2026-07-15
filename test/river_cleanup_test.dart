@@ -54,6 +54,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(find.text('Jugar de nuevo'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('Volver al mundo'), 80);
     expect(find.text('Volver al mundo'), findsOneWidget);
   });
 }

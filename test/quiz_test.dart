@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:save_earth/widgets/option_tile.dart';
 import 'package:save_earth/screens/quiz/quiz_screen.dart';
 
 void main() {
@@ -18,7 +19,7 @@ void main() {
       const MaterialApp(home: QuizScreen()),
     );
 
-    await tester.tap(find.byType(OutlinedButton).first);
+    await tester.tap(find.byType(OptionTile).first);
     await tester.pumpAndSettle();
 
     expect(find.text('Continuar'), findsOneWidget);

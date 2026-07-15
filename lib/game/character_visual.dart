@@ -1,14 +1,16 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:flame/components.dart' show Anchor, TextPaint, Vector2;
-import 'package:flutter/material.dart' show TextStyle;
+import 'package:flame/components.dart' show Vector2;
+import 'package:flutter/material.dart' show IconData;
+
+import 'icon_paint.dart';
 
 enum CharacterFacing { up, down, left, right }
 
 /// Shared humanoid placeholder renderer used by both [PlayerComponent] and
 /// [NpcComponent]: a small body with legs/arms that swing while walking, a
-/// head with eyes that shift to show facing, and an optional emoji badge
+/// head with eyes that shift to show facing, and an optional icon badge
 /// for personality. Centralized here so both characters stay visually
 /// consistent and any future sprite swap only touches one file.
 class CharacterVisual {
@@ -25,7 +27,8 @@ class CharacterVisual {
     required double walkPhase,
     required bool isMoving,
     required CharacterFacing facing,
-    String? badgeEmoji,
+    IconData? badgeIcon,
+    Color badgeColor = const Color(0xFF2E7D32),
     double scale = 1.0,
   }) {
     final legSwing = isMoving ? math.sin(walkPhase) * 4 * scale : 0.0;
@@ -116,12 +119,23 @@ class CharacterVisual {
     canvas.drawCircle(headCenter + Offset(-3, -1) * scale + eyeOffset * scale, 1.3 * scale, eyePaint);
     canvas.drawCircle(headCenter + Offset(3, -1) * scale + eyeOffset * scale, 1.3 * scale, eyePaint);
 
-    if (badgeEmoji != null) {
-      TextPaint(style: TextStyle(fontSize: 13 * scale)).render(
+    if (badgeIcon != null) {
+      final badgeCenter = Offset(headCenter.dx + 10 * scale, headCenter.dy - 9 * scale);
+      canvas.drawCircle(badgeCenter, 7.5 * scale, Paint()..color = const Color(0xFFFFFFFF));
+      canvas.drawCircle(
+        badgeCenter,
+        7.5 * scale,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2
+          ..color = badgeColor.withValues(alpha: 0.55),
+      );
+      renderIcon(
         canvas,
-        badgeEmoji,
-        Vector2(headCenter.dx + 10 * scale, headCenter.dy - 9 * scale),
-        anchor: Anchor.center,
+        badgeIcon,
+        position: Vector2(badgeCenter.dx, badgeCenter.dy),
+        size: 10 * scale,
+        color: badgeColor,
       );
     }
   }

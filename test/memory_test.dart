@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:save_earth/screens/memory/memory_screen.dart';
@@ -18,7 +19,7 @@ void main() {
 
     expect(find.textContaining('Movimientos: 0'), findsOneWidget);
     expect(find.textContaining('Parejas encontradas: 0 de'), findsOneWidget);
-    expect(find.byIcon(Icons.eco_outlined), findsNWidgets(16));
+    expect(find.byIcon(PhosphorIconsFill.leaf), findsNWidgets(16));
   });
 
   testWidgets('Tapping a card flips it to reveal its content', (tester) async {
@@ -29,9 +30,9 @@ void main() {
       const MaterialApp(home: MemoryScreen()),
     );
 
-    await tester.tap(find.byIcon(Icons.eco_outlined).first);
+    await tester.tap(find.byIcon(PhosphorIconsFill.leaf).first);
     await tester.pump();
 
-    expect(find.byIcon(Icons.eco_outlined), findsNWidgets(15));
+    expect(find.byIcon(PhosphorIconsFill.leaf), findsNWidgets(15));
   });
 }

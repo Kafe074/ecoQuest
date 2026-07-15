@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../services/score_service.dart';
 import '../../theme/app_theme.dart';
@@ -107,7 +108,7 @@ class _WasteSortingScreenState extends State<WasteSortingScreen> {
   Widget build(BuildContext context) {
     return GameScaffold(
       title: 'Clasificá los Residuos',
-      emoji: '🗑️',
+      icon: PhosphorIconsFill.recycle,
       color: _themeColor,
       subtitle: 'Arrastrá cada objeto a su tacho',
       child: _finished ? _buildEnding(context) : _buildGame(context),
@@ -122,13 +123,13 @@ class _WasteSortingScreenState extends State<WasteSortingScreen> {
         Row(
           children: [
             HudChip(
-              icon: Icons.timer_outlined,
+              icon: PhosphorIconsBold.timer,
               label: '$_secondsLeft s',
               color: _secondsLeft <= 10 ? Colors.redAccent : _themeColor,
             ),
             const Spacer(),
             HudChip(
-              icon: Icons.star_rounded,
+              icon: PhosphorIconsFill.star,
               label: 'Puntaje: $_score',
               color: AppTheme.primaryGreen,
             ),
@@ -158,8 +159,10 @@ class _WasteSortingScreenState extends State<WasteSortingScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    _feedbackCorrect ? Icons.check_circle_rounded : Icons.info_rounded,
+                  PhosphorIcon(
+                    _feedbackCorrect
+                        ? PhosphorIconsFill.checkCircle
+                        : PhosphorIconsFill.info,
                     color: _feedbackCorrect ? AppTheme.primaryGreen : Colors.redAccent,
                     size: 20,
                   ),
@@ -190,9 +193,26 @@ class _WasteSortingScreenState extends State<WasteSortingScreen> {
         ),
         const SizedBox(height: 10),
         Center(
-          child: Text(
-            '⬇ Arrastralo hasta el tacho correcto ⬇',
-            style: TextStyle(color: Colors.grey.shade500, fontSize: 11.5),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              PhosphorIcon(
+                PhosphorIconsBold.caretDoubleDown,
+                size: 13,
+                color: Colors.grey.shade500,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Arrastralo hasta el tacho correcto',
+                style: TextStyle(color: Colors.grey.shade500, fontSize: 11.5),
+              ),
+              const SizedBox(width: 6),
+              PhosphorIcon(
+                PhosphorIconsBold.caretDoubleDown,
+                size: 13,
+                color: Colors.grey.shade500,
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 12),
@@ -218,37 +238,37 @@ class _WasteSortingScreenState extends State<WasteSortingScreen> {
     final total = _items.length;
     final accuracy = total == 0 ? 0 : ((_score / total) * 100).round();
 
-    final String emoji;
+    final IconData icon;
     final String title;
     final String message;
     if (accuracy >= 80) {
-      emoji = '♻️';
+      icon = PhosphorIconsFill.recycle;
       title = '¡Experto en reciclaje!';
       message = 'Clasificás los residuos con muy buena puntería. Seguí así en tu vida diaria.';
     } else if (accuracy >= 50) {
-      emoji = '🌱';
+      icon = PhosphorIconsFill.plant;
       title = 'Vas bien encaminado';
       message = 'Acertaste varios, pero todavía hay algunas categorías para repasar.';
     } else {
-      emoji = '🤔';
+      icon = PhosphorIconsFill.lightbulb;
       title = 'A seguir practicando';
       message = 'Separar bien los residuos lleva práctica. ¡Intentalo de nuevo!';
     }
 
     return GameEndingView(
-      emoji: emoji,
+      icon: icon,
       title: title,
       message: message,
       color: _themeColor,
       stats: [
-        EndingStat(icon: Icons.check_circle_outline, label: 'Aciertos', value: '$_score de $_index'),
-        EndingStat(icon: Icons.close_rounded, label: 'Errores', value: '$_mistakes'),
-        EndingStat(icon: Icons.percent_rounded, label: 'Precisión', value: '$accuracy%'),
+        EndingStat(icon: PhosphorIconsBold.checkCircle, label: 'Aciertos', value: '$_score de $_index'),
+        EndingStat(icon: PhosphorIconsBold.xCircle, label: 'Errores', value: '$_mistakes'),
+        EndingStat(icon: PhosphorIconsBold.percent, label: 'Precisión', value: '$accuracy%'),
       ],
       bestText: _bestAccuracy == null
           ? null
           : _bestAccuracy == accuracy
-              ? '¡Nuevo mejor puntaje! 🏆'
+              ? '¡Nuevo mejor puntaje!'
               : 'Mejor puntaje: $_bestAccuracy%',
       isNewBest: _bestAccuracy != null && _bestAccuracy == accuracy,
       onRestart: _restart,
@@ -269,36 +289,45 @@ class _ItemCard extends StatelessWidget {
       child: Container(
         width: 170,
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppTheme.earthBlue.withValues(alpha: 0.25)),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.earthBlue.withValues(alpha: dragging ? 0.35 : 0.12),
-              blurRadius: dragging ? 16 : 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
+        decoration: AppTheme.clayDecoration(
+          surface: Colors.white,
+          edge: AppTheme.earthBlue.withValues(alpha: dragging ? 0.55 : 0.30),
+          radius: 22,
+          depth: dragging ? 7 : 5,
+          borderColor: AppTheme.earthBlue.withValues(alpha: 0.22),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 58,
-              height: 58,
+              width: 60,
+              height: 60,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: item.category.color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    item.category.color.withValues(alpha: 0.16),
+                    item.category.color.withValues(alpha: 0.30),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: item.category.color.withValues(alpha: 0.30),
+                ),
               ),
-              child: Text(item.emoji, style: const TextStyle(fontSize: 32)),
+              child: PhosphorIcon(
+                item.icon,
+                size: 32,
+                color: AppTheme.darken(item.category.color, 0.12),
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               item.name,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
             ),
           ],
         ),
@@ -333,23 +362,29 @@ class _BinTarget extends StatelessWidget {
                   category.color.withValues(alpha: highlighted ? 0.45 : 0.2),
                 ],
               ),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(18),
               border: Border.all(
                 color: category.color.withValues(alpha: highlighted ? 1 : 0.45),
                 width: highlighted ? 2.5 : 1.5,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: category.color.withValues(alpha: highlighted ? 0.5 : 0.25),
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(7),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.85),
+                    color: Colors.white.withValues(alpha: 0.9),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(category.icon, color: category.color, size: 18),
+                  child: PhosphorIcon(category.icon, color: category.color, size: 18),
                 ),
                 const SizedBox(width: 8),
                 Flexible(
@@ -357,7 +392,7 @@ class _BinTarget extends StatelessWidget {
                     category.label,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Color.lerp(category.color, Colors.black, 0.3),
+                      color: AppTheme.darken(category.color, 0.3),
                       fontWeight: FontWeight.w800,
                       fontSize: 12,
                     ),

@@ -1,5 +1,6 @@
 import 'package:flame/game.dart' show Vector2;
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Describes one wandering NPC: who they are, where they roam, and the
 /// awareness messages they can share when the player talks to them.
@@ -8,7 +9,7 @@ class NpcData {
   const NpcData({
     required this.id,
     required this.name,
-    required this.emoji,
+    required this.icon,
     required this.color,
     required this.homePosition,
     required this.leashRadius,
@@ -17,7 +18,7 @@ class NpcData {
 
   final String id;
   final String name;
-  final String emoji;
+  final IconData icon;
   final Color color;
   final Vector2 homePosition;
   final double leashRadius;
@@ -28,7 +29,7 @@ final List<NpcData> kNpcs = [
   NpcData(
     id: 'rosa',
     name: 'Doña Rosa',
-    emoji: '🌻',
+    icon: PhosphorIconsFill.flower,
     color: Colors.pink.shade300,
     homePosition: Vector2(620, 480),
     leashRadius: 90,
@@ -41,7 +42,7 @@ final List<NpcData> kNpcs = [
   NpcData(
     id: 'tomas',
     name: 'Tomás',
-    emoji: '🧒',
+    icon: PhosphorIconsFill.student,
     color: Colors.lightBlue.shade300,
     homePosition: Vector2(1000, 480),
     leashRadius: 90,
@@ -54,7 +55,7 @@ final List<NpcData> kNpcs = [
   NpcData(
     id: 'clara',
     name: 'Clara',
-    emoji: '🚴',
+    icon: PhosphorIconsFill.personSimpleBike,
     color: Colors.teal.shade300,
     homePosition: Vector2(620, 750),
     leashRadius: 90,
@@ -67,7 +68,7 @@ final List<NpcData> kNpcs = [
   NpcData(
     id: 'beto',
     name: 'Don Beto',
-    emoji: '🧺',
+    icon: PhosphorIconsFill.basket,
     color: Colors.deepOrange.shade300,
     homePosition: Vector2(1000, 750),
     leashRadius: 90,

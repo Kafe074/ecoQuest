@@ -4,8 +4,10 @@ import 'dart:ui' as ui;
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../services/score_service.dart';
+import 'icon_paint.dart';
 import 'player_component.dart';
 import 'station_data.dart';
 import 'world_game.dart';
@@ -99,7 +101,10 @@ class StationComponent extends PositionComponent
         ..shader = ui.Gradient.radial(
           centerOffset - Offset(visualRadius * 0.35, visualRadius * 0.35),
           visualRadius * 1.4,
-          [Colors.white.withValues(alpha: 0.85), data.color],
+          [
+            Color.lerp(data.color, Colors.white, 0.35)!,
+            Color.lerp(data.color, Colors.black, 0.15)!,
+          ],
         ),
     );
     canvas.drawCircle(
@@ -110,8 +115,13 @@ class StationComponent extends PositionComponent
         ..strokeWidth = 3
         ..color = Colors.white,
     );
-    TextPaint(style: const TextStyle(fontSize: 26))
-        .render(canvas, data.emoji, center, anchor: Anchor.center);
+    renderIcon(
+      canvas,
+      data.icon,
+      position: center,
+      size: 26,
+      color: Colors.white,
+    );
     TextPaint(
       style: const TextStyle(
         fontSize: 11,
@@ -136,8 +146,13 @@ class StationComponent extends PositionComponent
           ..strokeWidth = 1.5
           ..color = Colors.amber.shade700,
       );
-      TextPaint(style: const TextStyle(fontSize: 13))
-          .render(canvas, '⭐', Vector2(badgeCenter.dx, badgeCenter.dy), anchor: Anchor.center);
+      renderIcon(
+        canvas,
+        PhosphorIconsFill.star,
+        position: Vector2(badgeCenter.dx, badgeCenter.dy),
+        size: 13,
+        color: Colors.amber.shade600,
+      );
     }
   }
 

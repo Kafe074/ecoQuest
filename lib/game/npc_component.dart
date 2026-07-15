@@ -95,7 +95,8 @@ class NpcComponent extends PositionComponent
       walkPhase: _bobTime,
       isMoving: _isMoving,
       facing: _facing,
-      badgeEmoji: data.emoji,
+      badgeIcon: data.icon,
+      badgeColor: Color.lerp(data.color, const Color(0xFF000000), 0.35)!,
       scale: 0.85,
     );
     TextPaint(

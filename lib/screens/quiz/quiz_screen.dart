@@ -1,11 +1,15 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../services/score_service.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/eco_dialog.dart';
 import '../../widgets/game_ending.dart';
+import '../../widgets/game_modal.dart';
 import '../../widgets/game_scaffold.dart';
+import '../../widgets/option_tile.dart';
 import 'quiz_data.dart';
 
 class QuizScreen extends StatefulWidget {
@@ -44,10 +48,10 @@ class _QuizScreenState extends State<QuizScreen> {
 
     await showEcoDialog(
       context,
-      title: correct ? '¡Correcto! ✅' : 'No era esa ❌',
+      title: correct ? '¡Correcto!' : 'No era esa',
       message: question.explanation,
       color: correct ? Colors.green.shade700 : Colors.redAccent,
-      emoji: correct ? '🎉' : '💡',
+      icon: correct ? PhosphorIconsFill.confetti : PhosphorIconsFill.lightbulb,
     );
 
     setState(() {
@@ -79,9 +83,9 @@ class _QuizScreenState extends State<QuizScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return GameScaffold(
+    return GameModal(
       title: 'Quiz Ambiental',
-      emoji: '❓',
+      icon: PhosphorIconsFill.question,
       color: _themeColor,
       subtitle: 'Demostrá cuánto sabés del planeta',
       child: _finished ? _buildEnding(context) : _buildQuestion(context),
@@ -91,18 +95,19 @@ class _QuizScreenState extends State<QuizScreen> {
   Widget _buildQuestion(BuildContext context) {
     final question = _questions[_index];
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           children: [
             HudChip(
-              icon: Icons.star_rounded,
+              icon: PhosphorIconsFill.star,
               label: 'Puntaje: $_score',
               color: _themeColor,
             ),
             const Spacer(),
             HudChip(
-              icon: Icons.help_outline_rounded,
+              icon: PhosphorIconsBold.question,
               label: '${_index + 1}/${_questions.length}',
               color: _themeColor,
             ),
@@ -115,80 +120,26 @@ class _QuizScreenState extends State<QuizScreen> {
           color: _themeColor,
         ),
         const SizedBox(height: 14),
-        Expanded(
-          child: ListView(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border(
-                    left: BorderSide(color: _themeColor, width: 5),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Text(
-                  question.question,
-                  style: const TextStyle(fontSize: 18.5, fontWeight: FontWeight.w700, height: 1.35),
-                ),
-              ),
-              const SizedBox(height: 16),
-              ...List.generate(question.options.length, (optionIndex) {
-                final letter = String.fromCharCode(65 + optionIndex);
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black87,
-                      side: BorderSide(color: _themeColor.withValues(alpha: 0.3)),
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      alignment: Alignment.centerLeft,
-                    ),
-                    onPressed: () => _selectOption(question, optionIndex),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 32,
-                          height: 32,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: _themeColor.withValues(alpha: 0.12),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Text(
-                            letter,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w800,
-                              color: Color.lerp(_themeColor, Colors.black, 0.25),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            question.options[optionIndex],
-                            style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-            ],
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: AppTheme.claySurface(tint: _themeColor, radius: 18, depth: 3),
+          child: Text(
+            question.question,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, height: 1.3),
           ),
         ),
+        const SizedBox(height: 12),
+        ...List.generate(question.options.length, (optionIndex) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: OptionTile(
+              color: _themeColor,
+              leadingText: String.fromCharCode(65 + optionIndex),
+              label: question.options[optionIndex],
+              onTap: () => _selectOption(question, optionIndex),
+            ),
+          );
+        }),
       ],
     );
   }
@@ -197,36 +148,37 @@ class _QuizScreenState extends State<QuizScreen> {
     final total = _questions.length;
     final accuracy = total == 0 ? 0 : ((_score / total) * 100).round();
 
-    final String emoji;
+    final IconData icon;
     final String title;
     final String message;
     if (accuracy >= 80) {
-      emoji = '🌎';
+      icon = PhosphorIconsFill.globeHemisphereWest;
       title = '¡Sos un experto ambiental!';
       message = 'Sabés muchísimo sobre el cuidado del planeta. ¡Compartí lo que aprendiste!';
     } else if (accuracy >= 50) {
-      emoji = '🌱';
+      icon = PhosphorIconsFill.plant;
       title = 'Buen conocimiento';
       message = 'Conocés varios conceptos clave. Seguí aprendiendo para saber aún más.';
     } else {
-      emoji = '🤔';
+      icon = PhosphorIconsFill.lightbulb;
       title = 'Hay mucho para aprender';
       message = 'No te preocupes, cada dato nuevo suma. ¡Volvé a intentarlo!';
     }
 
     return GameEndingView(
-      emoji: emoji,
+      compact: true,
+      icon: icon,
       title: title,
       message: message,
       color: _themeColor,
       stats: [
-        EndingStat(icon: Icons.check_circle_outline, label: 'Correctas', value: '$_score de $total'),
-        EndingStat(icon: Icons.percent_rounded, label: 'Precisión', value: '$accuracy%'),
+        EndingStat(icon: PhosphorIconsBold.checkCircle, label: 'Correctas', value: '$_score de $total'),
+        EndingStat(icon: PhosphorIconsBold.percent, label: 'Precisión', value: '$accuracy%'),
       ],
       bestText: _bestAccuracy == null
           ? null
           : _bestAccuracy == accuracy
-              ? '¡Nuevo mejor puntaje! 🏆'
+              ? '¡Nuevo mejor puntaje!'
               : 'Mejor puntaje: $_bestAccuracy%',
       isNewBest: _bestAccuracy != null && _bestAccuracy == accuracy,
       onRestart: _restart,
